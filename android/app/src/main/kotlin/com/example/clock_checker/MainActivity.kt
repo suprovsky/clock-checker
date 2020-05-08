@@ -1,4 +1,4 @@
-package com.example.clock_checker
+package com.suprovsky.clock_checker
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
