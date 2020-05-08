@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
@@ -40,11 +38,23 @@ class TimeSources {
   static Map<String, tz.Location> locations;
   static List<String> locationsList;
   static String currentLocation;
+  static List<String> timezonesAfrica = [];
+  static List<String> timezonesAmerica = [];
+  static List<String> timezonesAntarctica = [];
+  static List<String> timezonesAsia = [];
+  static List<String> timezonesAtlantic = [];
+  static List<String> timezonesAustralia = [];
+  static List<String> timezonesCanada = [];
+  static List<String> timezonesEurope = [];
+  static List<String> timezonesIndian = [];
+  static List<String> timezonesPacific = [];
+  static List<String> timezonesUS = [];
   TimeSources() {
     tz.initializeTimeZones();
     locations = tz.timeZoneDatabase.locations;
     locationsList = locations.keys.toList();
     currentLocation = 'Europe/Warsaw';
+    sortLocations();
   }
   Map<String, tz.Location> getLocations() {
     return locations;
@@ -56,38 +66,40 @@ class TimeSources {
 
   static String currentNTPserver = "pl.pool.ntp.org";
 
+  void sortLocations() => locationsList.forEach((element) {
+
+      if (element.toString().startsWith('Africa')) {
+        timezonesAfrica.add(element);
+      }
+      if (element.toString().startsWith('America')) {
+        timezonesAmerica.add(element);
+      }
+      if (element.toString().startsWith('Antarctica')) {
+        timezonesAntarctica.add(element);
+      }
+      if (element.toString().startsWith('Atlantic')) {
+        timezonesAtlantic.add(element);
+      }
+      if (element.toString().startsWith('Australia')) {
+        timezonesAustralia.add(element);
+      }
+      if (element.toString().startsWith('Canada')) {
+        timezonesCanada.add(element);
+      }
+      if (element.toString().startsWith('Europe')) {
+        timezonesEurope.add(element);
+      }
+      if (element.toString().startsWith('Indian')) {
+        timezonesIndian.add(element);
+      }
+      if (element.toString().startsWith('Pacific')) {
+        timezonesPacific.add(element);
+      }
+      if (element.toString().startsWith('US')) {
+        timezonesUS.add(element);
+      }
+    });
   
-  static Map<String, String> customLocationsList = {
-    'GMT-12 - UTC-12 - AoE - Y': 'Pacific-Midway',
-    'GMT-11 - UTC-11 - NUT - SST - X': 'GMT-11',
-    'GMT-11/GMT-10 - UTC-11/UTC-10 - AET'
-    'GMT-10 - UTC-10 - CKT - HST - TAHT - W': 'GMT-10',
-    'GMT-9:30 - UTC-9:30 - MART': 'GMT-9:30',
-    'GMT-9 - UTC-9 - AKST - GAMT - HDT ': 'GMT-9',
-    'GMT-8 - UTC-8': 'GMT-8',
-    'GMT-7 - UTC-7': 'GMT-7',
-    'GMT-6 - UTC-6': 'GMT-6',
-    'GMT-5 - UTC-5': 'GMT-5',
-    'GMT-4 - UTC-4': 'GMT-4',
-    'GMT-3 - UTC-3': 'GMT-3',
-    'GMT-2 - UTC-2': 'GMT-2',
-    'GMT-1 - UTC-1': 'GMT-1',
-    'GMT - UTC': 'GMT',
-    'GMT+1 - UTC+1': 'GMT+1',
-    'GMT+2 - UTC+2': 'GMT+2',
-    'GMT+3 - UTC+3': 'GMT+3',
-    'GMT+4 - UTC+4': 'GMT+4',
-    'GMT+5 - UTC+5': 'GMT+5',
-    'GMT+6 - UTC+6': 'GMT+6',
-    'GMT+7 - UTC+7': 'GMT+7',
-    'GMT+8 - UTC+8': 'GMT+8',
-    'GMT+9 - UTC+9': 'GMT+9',
-    'GMT+10 - UTC+10': 'GMT+10',
-    'GMT+11 - UTC+11': 'GMT+11',
-    'GMT+12 - UTC+12': 'GMT+12',
-    'GMT+13 - UTC+13': 'GMT+13',
-    'GMT+14 - UTC+14': 'GMT+14',
-  };
 
   static List<NTPServer> ntpServers = [
     NTPServer(AssetImage('icons/flags/png/us.png', package: 'country_icons'),

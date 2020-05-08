@@ -1,3 +1,4 @@
+import 'package:clock_checker/views/timezone_list.dart';
 import 'package:flutter/material.dart';
 import '../views/main_menu.dart';
 
@@ -34,7 +35,7 @@ class _NTPTesterState extends State<NTPTester> {
                     margin: EdgeInsets.all(10),
                     child: Text(
                       'Data from NTP Server',
-                      style: TextStyle(color: Colors.black, fontSize: 25),
+                      style: TextStyle(fontSize: 25),
                     ),
                   )
                 ],
@@ -46,7 +47,7 @@ class _NTPTesterState extends State<NTPTester> {
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                     child: Text(
                       'NTP server address:',
-                      style: TextStyle(color: Colors.black, fontSize: 15),
+                      style: TextStyle(fontSize: 15),
                     ),
                   )
                 ],
@@ -58,7 +59,7 @@ class _NTPTesterState extends State<NTPTester> {
                     margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: Text(
                       'NTP time:',
-                      style: TextStyle(color: Colors.black, fontSize: 15),
+                      style: TextStyle(fontSize: 15),
                     ),
                   )
                 ],
@@ -70,7 +71,7 @@ class _NTPTesterState extends State<NTPTester> {
                     margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
                     child: Text(
                       'Difference with system time:',
-                      style: TextStyle(color: Colors.black, fontSize: 15),
+                      style: TextStyle(fontSize: 15),
                     ),
                   )
                 ],
@@ -133,7 +134,7 @@ class _NTPTesterState extends State<NTPTester> {
                     margin: EdgeInsets.fromLTRB(0, 40, 0, 10),
                     child: Text(
                       'Add your server to the list:',
-                      style: TextStyle(color: Colors.black, fontSize: 20),
+                      style: TextStyle(fontSize: 20),
                     ),
                   ),
                 ],

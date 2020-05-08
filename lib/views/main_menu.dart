@@ -1,6 +1,6 @@
 import 'dart:async';
-
 import 'package:clock_checker/models/data_sources.dart';
+import 'package:clock_checker/views/timezone_list.dart';
 import 'package:flutter/material.dart';
 import 'credits.dart';
 import '../views/ntp_tester.dart';
@@ -16,20 +16,22 @@ class MainMenu extends StatefulWidget {
 
 class _MainMenu extends State<MainMenu> {
   String systemTime = readTimeLikeAHuman();
-_MainMenu(){
-          Timer.periodic(Duration(milliseconds: 500), (timer) {
+  _MainMenu() {
+    Timer.periodic(Duration(milliseconds: 500), (timer) {
       setState(() {
         this.systemTime = readTimeLikeAHumanTest(
             tz.TZDateTime.now(tz.getLocation(TimeSources.currentLocation)));
       });
     });
-}
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
-        theme: ThemeData(fontFamily: 'Ubuntu'),
+        theme: ThemeData(fontFamily: 'Ubuntu',
+        primaryColor: Colors.red,
+        accentColor: Colors.redAccent,
+        ),
         home: Builder(
           builder: (context) => DefaultTabController(
               length: 2,
@@ -46,15 +48,23 @@ _MainMenu(){
                     ],
                     centerTitle: true,
                     title: Text('Clock Checker'),
-                    bottom: TabBar(tabs: [
+                    bottom: TabBar(
+                      labelColor: Colors.redAccent,
+                      unselectedLabelColor: Colors.white,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicator: BoxDecoration(
+                        borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+                        color: Colors.white
+                      ),
+                      tabs: [
                       Tab(icon: Icon(Icons.access_time), text: 'check time'),
                       Tab(icon: Icon(Icons.router), text: 'ntp tester'),
                     ])),
                 body: TabBarView(children: [
                   SingleChildScrollView(
-                                      child: ConstrainedBox(
+                    child: ConstrainedBox(
                       constraints: BoxConstraints(),
-                                        child: Column(
+                      child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -66,7 +76,7 @@ _MainMenu(){
                                   child: Text(
                                     'System time:',
                                     style: TextStyle(
-                                        color: Colors.black, fontSize: 20),
+                                        fontSize: 20),
                                   ),
                                 )
                               ],
@@ -87,7 +97,7 @@ _MainMenu(){
                                   child: Text(
                                     'Time from chosen NTP server:',
                                     style: TextStyle(
-                                        color: Colors.black, fontSize: 20),
+                                        fontSize: 20),
                                   ),
                                 ),
                               ],
@@ -99,7 +109,6 @@ _MainMenu(){
                                   margin: EdgeInsets.all(5),
                                   child: Text(
                                     'Address: ${TimeSources.currentNTPserver}',
-                                    style: TextStyle(color: Colors.black),
                                   ),
                                 ),
                               ],
@@ -117,7 +126,7 @@ _MainMenu(){
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (context) =>
-                                        NTPServerGUIList())); //TODO: implement getting choice from list
+                                        NTPServerGUIList()));
                               },
                               child: Container(
                                 height: 40,
@@ -138,7 +147,7 @@ _MainMenu(){
                                   child: Text(
                                     'Times are shown for a timezone:',
                                     style: TextStyle(
-                                        color: Colors.black, fontSize: 20),
+                                        fontSize: 20),
                                   ),
                                 )
                               ],
@@ -149,16 +158,15 @@ _MainMenu(){
                                 Container(
                                     margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                                     child: Text(
-                                        TimeSources
-                                            .currentLocation, //TODO: insert timezone after reimplementation of the timezone list
-                                        style: TextStyle(fontSize: 30)))
+                                        TimeSources.currentLocation
+                                            .replaceAll('_', ' '),
+                                        style: TextStyle(fontSize: 25)))
                               ],
                             ),
                             GestureDetector(
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) =>
-                                        TimezoneGUIList())); //TODO: reimplement list (timezones), 426 elements are too much
+                                    builder: (context) => TimezoneGroupList()));
                               },
                               child: Container(
                                 height: 40,
@@ -181,39 +189,6 @@ _MainMenu(){
   }
 }
 
-class TimezoneGUIList extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _TimezoneGUIList();
-}
-
-class _TimezoneGUIList extends State<TimezoneGUIList> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Timezones'),
-        ),
-        body: ListView.builder(
-            itemCount: TimeSources.locationsList.length,
-            itemBuilder: (BuildContext context, int index) {
-              String key = TimeSources.locationsList.elementAt(index);
-              return Column(
-                children: <Widget>[
-                  ListTile(
-                    onTap: () {
-                      TimeSources.currentLocation = key;
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => MainMenu()));
-                    },
-                    title: Text(key),
-                  ),
-                  Divider(height: 2.0)
-                ],
-              );
-            }));
-  }
-}
-
 class NTPServerGUIList extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _NTPServerGUIList();
@@ -233,13 +208,21 @@ class _NTPServerGUIList extends State<NTPServerGUIList> {
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentNTPserver = TimeSources.ntpServers.elementAt(index).getfqdnOrIPaddress();
+                      TimeSources.currentNTPserver = TimeSources.ntpServers
+                          .elementAt(index)
+                          .getfqdnOrIPaddress();
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.ntpServers.elementAt(index).getserverName()),
-                    subtitle: Text(TimeSources.ntpServers.elementAt(index).getfqdnOrIPaddress()),
-                    leading: CircleAvatar(backgroundImage: TimeSources.ntpServers.elementAt(index).getFlag()),
+                    title: Text(TimeSources.ntpServers
+                        .elementAt(index)
+                        .getserverName()),
+                    subtitle: Text(TimeSources.ntpServers
+                        .elementAt(index)
+                        .getfqdnOrIPaddress()),
+                    leading: CircleAvatar(
+                        backgroundImage:
+                            TimeSources.ntpServers.elementAt(index).getFlag()),
                   ),
                   Divider(height: 2.0)
                 ],

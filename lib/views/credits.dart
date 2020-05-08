@@ -20,8 +20,7 @@ class Credits extends StatelessWidget {
                       child: Text('This app has been made by:',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 30,
+                            fontSize: 30
                           )),
                     )
                   ],
@@ -49,7 +48,7 @@ class Credits extends StatelessWidget {
                                     fontSize: 30,
                                     decoration: TextDecoration.underline))),
                         Text('Radosław Serba',
-                            style: TextStyle(color: Colors.black, fontSize: 15)),
+                            style: TextStyle(fontSize: 15)),
                       ],
                     ),
                     Column(
@@ -75,7 +74,6 @@ class Credits extends StatelessWidget {
                         ),
                         Text('Piotr Dyduch',
                             style: TextStyle(
-                              color: Colors.black,
                               fontSize: 15,
                             ))
                       ],
