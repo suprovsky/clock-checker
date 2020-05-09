@@ -4,8 +4,6 @@ import 'package:clock_checker/views/timezone_list.dart';
 import 'package:flutter/material.dart';
 import 'credits.dart';
 import '../views/ntp_tester.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
 
 class MainMenu extends StatefulWidget {
   @override
@@ -15,28 +13,38 @@ class MainMenu extends StatefulWidget {
 }
 
 class _MainMenu extends State<MainMenu> {
-  String systemTime = readTimeLikeAHuman();
+  String systemTime = TimeSources.getSystemTimeToString();
+  String ntpTime = '';
+  Timer _timer;
+
   _MainMenu() {
-    Timer.periodic(Duration(milliseconds: 500), (timer) {
+    Timer.periodic(Duration(milliseconds: 500), (_timer) {
       setState(() {
-        this.systemTime = readTimeLikeAHumanTest(
-            tz.TZDateTime.now(tz.getLocation(TimeSources.currentLocation)));
+        this.systemTime = TimeSources.getSystemTimeToString();
+
+        //TODO: implement getting NTP TimeDate
       });
     });
   }
 
   @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(fontFamily: 'Ubuntu',
-        primaryColor: Colors.red,
-        accentColor: Colors.redAccent,
+        theme: ThemeData(
+          fontFamily: 'Ubuntu',
+          primaryColor: Colors.red,
+          accentColor: Colors.redAccent,
         ),
         home: Builder(
           builder: (context) => DefaultTabController(
               length: 2,
               child: Scaffold(
-                //
                 appBar: AppBar(
                     actions: <Widget>[
                       IconButton(
@@ -49,17 +57,20 @@ class _MainMenu extends State<MainMenu> {
                     centerTitle: true,
                     title: Text('Clock Checker'),
                     bottom: TabBar(
-                      labelColor: Colors.redAccent,
-                      unselectedLabelColor: Colors.white,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      indicator: BoxDecoration(
-                        borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-                        color: Colors.white
-                      ),
-                      tabs: [
-                      Tab(icon: Icon(Icons.access_time), text: 'check time'),
-                      Tab(icon: Icon(Icons.router), text: 'ntp tester'),
-                    ])),
+                        labelColor: Colors.redAccent,
+                        unselectedLabelColor: Colors.white,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicator: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10)),
+                            color: Colors.white),
+                        tabs: [
+                          Tab(
+                              icon: Icon(Icons.access_time),
+                              text: 'check time'),
+                          Tab(icon: Icon(Icons.router), text: 'ntp tester'),
+                        ])),
                 body: TabBarView(children: [
                   SingleChildScrollView(
                     child: ConstrainedBox(
@@ -75,8 +86,7 @@ class _MainMenu extends State<MainMenu> {
                                   margin: EdgeInsets.all(10),
                                   child: Text(
                                     'System time:',
-                                    style: TextStyle(
-                                        fontSize: 20),
+                                    style: TextStyle(fontSize: 20),
                                   ),
                                 )
                               ],
@@ -96,8 +106,7 @@ class _MainMenu extends State<MainMenu> {
                                 Container(
                                   child: Text(
                                     'Time from chosen NTP server:',
-                                    style: TextStyle(
-                                        fontSize: 20),
+                                    style: TextStyle(fontSize: 20),
                                   ),
                                 ),
                               ],
@@ -118,15 +127,14 @@ class _MainMenu extends State<MainMenu> {
                               children: [
                                 Container(
                                     child: Text(
-                                        '$systemTime', //TODO: implement getting time from timeserver
+                                        '$ntpTime', //TODO: implement getting time from timeserver
                                         style: TextStyle(fontSize: 30)))
                               ],
                             ),
-                            GestureDetector(
+                            InkWell(
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) =>
-                                        NTPServerGUIList()));
+                                    builder: (context) => NTPServerGUIList()));
                               },
                               child: Container(
                                 height: 40,
@@ -146,8 +154,7 @@ class _MainMenu extends State<MainMenu> {
                                   margin: EdgeInsets.fromLTRB(10, 40, 10, 10),
                                   child: Text(
                                     'Times are shown for a timezone:',
-                                    style: TextStyle(
-                                        fontSize: 20),
+                                    style: TextStyle(fontSize: 20),
                                   ),
                                 )
                               ],
@@ -202,27 +209,35 @@ class _NTPServerGUIList extends State<NTPServerGUIList> {
           title: Text('NTP servers'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.ntpServers.length,
+            itemCount: TimeSources.ntpServersList.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
-                    onTap: () {
-                      TimeSources.currentNTPserver = TimeSources.ntpServers
+                    onLongPress: () {
+                      if (TimeSources.ntpServersList
                           .elementAt(index)
-                          .getfqdnOrIPaddress();
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => MainMenu()));
+                          .isCustomEntry()) {
+                        setState(() {
+                          TimeSources.ntpServersList.removeAt(index);
+                        });
+                      }
                     },
-                    title: Text(TimeSources.ntpServers
+                    onTap: () {
+                      TimeSources.currentNTPserver = TimeSources.ntpServersList
+                          .elementAt(index);
+                      Navigator.of(context).pop();
+                    },
+                    title: Text(TimeSources.ntpServersList
                         .elementAt(index)
                         .getserverName()),
-                    subtitle: Text(TimeSources.ntpServers
+                    subtitle: Text(TimeSources.ntpServersList
                         .elementAt(index)
                         .getfqdnOrIPaddress()),
                     leading: CircleAvatar(
-                        backgroundImage:
-                            TimeSources.ntpServers.elementAt(index).getFlag()),
+                        backgroundImage: TimeSources.ntpServersList
+                            .elementAt(index)
+                            .getFlag()),
                   ),
                   Divider(height: 2.0)
                 ],

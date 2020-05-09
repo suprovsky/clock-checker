@@ -8,17 +8,20 @@ class NTPServer {
   AssetImage flag;
   String fqdnOrIPaddress;
   String serverName;
+  int port;
   bool customEntry;
-  NTPServer.custom(String fqdnOrIPaddress) {
+  NTPServer.custom(String fqdnOrIPaddress, String serverName) {
     flag = AssetImage('assets/int_flag.png');
     this.fqdnOrIPaddress = fqdnOrIPaddress;
-    serverName = 'custom NTP server entry';
+    this.serverName = serverName;
+    port = 123;
     customEntry = true;
   }
   NTPServer(AssetImage flag, String fqdnOrIPaddress, String serverName) {
     this.flag = flag;
     this.fqdnOrIPaddress = fqdnOrIPaddress;
     this.serverName = serverName;
+    port = 123;
     customEntry = false;
   }
   AssetImage getFlag() {
@@ -29,12 +32,12 @@ class NTPServer {
     return this.fqdnOrIPaddress;
   }
 
-  String getserverName() {
-    return this.serverName;
-  }
+  String getserverName() => this.serverName;
+  bool isCustomEntry() => this.customEntry;
 }
 
 class TimeSources {
+  static tz.TZDateTime currentTime;
   static Map<String, tz.Location> locations;
   static List<String> locationsList;
   static String currentLocation;
@@ -54,54 +57,69 @@ class TimeSources {
     locations = tz.timeZoneDatabase.locations;
     locationsList = locations.keys.toList();
     currentLocation = 'Europe/Warsaw';
+    currentTime = tz.TZDateTime.now(tz.getLocation(currentLocation));
     sortLocations();
   }
   Map<String, tz.Location> getLocations() {
     return locations;
   }
 
+  static String getSystemTimeToString() => readTimeLikeAHumanTest(
+      tz.TZDateTime.now(tz.getLocation(TimeSources.currentLocation)));
+
+  static String getNTPTimeToString() {
+    var offset = 0;
+    getNTPOffset(TimeSources.currentTime, currentNTPserver).then(
+      (value) => offset = value);
+    readTimeLikeAHumanTest(tz.TZDateTime.now(tz.getLocation(TimeSources.currentLocation)).add(Duration(milliseconds: offset)));
+  }
+
   List<String> getLocationsList() {
     return locationsList;
   }
 
-  static String currentNTPserver = "pl.pool.ntp.org";
+  static Future<int> getNTPOffset(tz.TZDateTime localTime, NTPServer server) async {
+    return await NTP.getNtpOffset(
+        localTime: localTime, lookUpAddress: server.fqdnOrIPaddress);
+    //TODO: add try-catch for unreachable IP address/FQDN
+  }
+
+  static NTPServer currentNTPserver;
 
   void sortLocations() => locationsList.forEach((element) {
+        if (element.toString().startsWith('Africa')) {
+          timezonesAfrica.add(element);
+        }
+        if (element.toString().startsWith('America')) {
+          timezonesAmerica.add(element);
+        }
+        if (element.toString().startsWith('Antarctica')) {
+          timezonesAntarctica.add(element);
+        }
+        if (element.toString().startsWith('Atlantic')) {
+          timezonesAtlantic.add(element);
+        }
+        if (element.toString().startsWith('Australia')) {
+          timezonesAustralia.add(element);
+        }
+        if (element.toString().startsWith('Canada')) {
+          timezonesCanada.add(element);
+        }
+        if (element.toString().startsWith('Europe')) {
+          timezonesEurope.add(element);
+        }
+        if (element.toString().startsWith('Indian')) {
+          timezonesIndian.add(element);
+        }
+        if (element.toString().startsWith('Pacific')) {
+          timezonesPacific.add(element);
+        }
+        if (element.toString().startsWith('US')) {
+          timezonesUS.add(element);
+        }
+      });
 
-      if (element.toString().startsWith('Africa')) {
-        timezonesAfrica.add(element);
-      }
-      if (element.toString().startsWith('America')) {
-        timezonesAmerica.add(element);
-      }
-      if (element.toString().startsWith('Antarctica')) {
-        timezonesAntarctica.add(element);
-      }
-      if (element.toString().startsWith('Atlantic')) {
-        timezonesAtlantic.add(element);
-      }
-      if (element.toString().startsWith('Australia')) {
-        timezonesAustralia.add(element);
-      }
-      if (element.toString().startsWith('Canada')) {
-        timezonesCanada.add(element);
-      }
-      if (element.toString().startsWith('Europe')) {
-        timezonesEurope.add(element);
-      }
-      if (element.toString().startsWith('Indian')) {
-        timezonesIndian.add(element);
-      }
-      if (element.toString().startsWith('Pacific')) {
-        timezonesPacific.add(element);
-      }
-      if (element.toString().startsWith('US')) {
-        timezonesUS.add(element);
-      }
-    });
-  
-
-  static List<NTPServer> ntpServers = [
+  static List<NTPServer> ntpServersList = [
     NTPServer(AssetImage('icons/flags/png/us.png', package: 'country_icons'),
         'time.google.com', 'Google Public NTP'),
     NTPServer(AssetImage('icons/flags/png/us.png', package: 'country_icons'),
@@ -197,26 +215,6 @@ class TimeSources {
     NTPServer(AssetImage('icons/flags/png/gb.png', package: 'country_icons'),
         'uk.pool.ntp.org', 'United Kingdom - pool.ntp.org'),
   ];
-}
-
-void getNTPTime() async {
-  DateTime _myTime;
-  DateTime _ntpTime;
-
-  /// Or you could get NTP current (It will call DateTime.now() and add NTP offset to it)
-  _myTime = await NTP.now();
-  // var warsaw = tz.getLocation('Europe/Warsaw');
-
-  /// Or get NTP offset (in milliseconds) and add it yourself
-  final int offset = await NTP.getNtpOffset(localTime: DateTime.now());
-  _ntpTime = _myTime.add(Duration(milliseconds: offset));
-  print('My time: $_myTime');
-  print('NTP time: $_ntpTime');
-  print('Difference: ${_myTime.difference(_ntpTime).inMilliseconds}ms');
-}
-
-String readTimeLikeAHuman() {
-  return DateFormat("E, d MMMM y, HH:mm:ss").format(DateTime.now()).toString();
 }
 
 String readTimeLikeAHumanTest(tz.TZDateTime currentTime) {

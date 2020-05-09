@@ -36,6 +36,7 @@ flutter:
   assets:
   - assets/bigfrog2_cropped.jpg
   - assets/horakhty_avatar.png
+  - assets/int_flag.png
   fonts:
     - family: Ubuntu
       fonts:
