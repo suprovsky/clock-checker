@@ -70,19 +70,19 @@ class Credits extends StatelessWidget {
                   ],
                 ),
                 GestureDetector(
-                  onTap: () => launch(
-                              'https://github.com/suprovsky/clock-checker'),
-                              child: Container(
-                                height: 40,
-                                margin: EdgeInsets.fromLTRB(80, 80, 80, 10),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    color: Colors.red),
-                                child: Center(
-                                  child: Text('Project page on GitHub'),
-                                ),
-                              ),
-                            ),
+                  onTap: () =>
+                      launch('https://github.com/suprovsky/clock-checker'),
+                  child: Container(
+                    height: 40,
+                    margin: EdgeInsets.fromLTRB(80, 80, 80, 10),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: Colors.red),
+                    child: Center(
+                      child: Text('Project page on GitHub'),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

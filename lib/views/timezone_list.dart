@@ -1,40 +1,6 @@
-import 'package:clock_checker/models/data_sources.dart';
+import 'package:clock_checker/repository/timezones.dart';
 import 'package:flutter/material.dart';
-
 import 'main_menu.dart';
-
-class TimezoneGUIList extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _TimezoneGUIList();
-}
-
-class _TimezoneGUIList extends State<TimezoneGUIList> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Timezones'),
-        ),
-        body: ListView.builder(
-            itemCount: TimeSources.locationsList.length,
-            itemBuilder: (BuildContext context, int index) {
-              String key = TimeSources.locationsList.elementAt(index);
-              return Column(
-                children: <Widget>[
-                  ListTile(
-                    onTap: () {
-                      TimeSources.currentLocation = key;
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => MainMenu()));
-                    },
-                    title: Text(key),
-                  ),
-                  Divider(height: 2.0)
-                ],
-              );
-            }));
-  }
-}
 
 class TimezoneGroupList extends StatefulWidget {
   @override
@@ -69,8 +35,8 @@ class _TimezoneGroupList extends State<TimezoneGroupList> {
             ),
             Divider(height: 2.0),
             ListTile(
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => TimezoneAsiaList())),
+              onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => TimezoneAsiaList())),
               title: Text('Asia'),
             ),
             Divider(height: 2.0),
@@ -111,8 +77,8 @@ class _TimezoneGroupList extends State<TimezoneGroupList> {
             ),
             Divider(height: 2.0),
             ListTile(
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => TimezoneUSList())),
+              onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => TimezoneUSList())),
               title: Text('US'),
             ),
             Divider(height: 2.0),
@@ -134,18 +100,18 @@ class _TimezoneAfricaList extends State<TimezoneAfricaList> {
           title: Text('Timezones in the Africa'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesAfrica.length,
+            itemCount: Timezones.timezonesAfrica.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesAfrica.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesAfrica.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesAfrica
+                    title: Text(Timezones.timezonesAfrica
                         .elementAt(index)
                         .substring(7)
                         .replaceAll('_', ' ')),
@@ -170,18 +136,18 @@ class _TimezoneAmericaList extends State<TimezoneAmericaList> {
           title: Text('Timezones in America'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesAmerica.length,
+            itemCount: Timezones.timezonesAmerica.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesAmerica.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesAmerica.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesAmerica
+                    title: Text(Timezones.timezonesAmerica
                         .elementAt(index)
                         .substring(8)
                         .replaceAll('_', ' ')),
@@ -206,18 +172,18 @@ class _TimezoneAntarcticaList extends State<TimezoneAntarcticaList> {
           title: Text('Timezones in the Antarctica'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesAntarctica.length,
+            itemCount: Timezones.timezonesAntarctica.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesAntarctica.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesAntarctica.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesAntarctica
+                    title: Text(Timezones.timezonesAntarctica
                         .elementAt(index)
                         .substring(11)
                         .replaceAll('_', ' ')),
@@ -242,18 +208,18 @@ class _TimezoneAsiaList extends State<TimezoneAsiaList> {
           title: Text('Timezones in the Asia'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesAsia.length,
+            itemCount: Timezones.timezonesAsia.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesAsia.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesAsia.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesAsia
+                    title: Text(Timezones.timezonesAsia
                         .elementAt(index)
                         .substring(5)
                         .replaceAll('_', ' ')),
@@ -278,18 +244,18 @@ class _TimezoneAtlanticList extends State<TimezoneAtlanticList> {
           title: Text('Timezones in the Atlantic'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesAtlantic.length,
+            itemCount: Timezones.timezonesAtlantic.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesAtlantic.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesAtlantic.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesAtlantic
+                    title: Text(Timezones.timezonesAtlantic
                         .elementAt(index)
                         .substring(9)
                         .replaceAll('_', ' ')),
@@ -314,18 +280,18 @@ class _TimezoneAustraliaList extends State<TimezoneAustraliaList> {
           title: Text('Timezones in the Australia'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesAustralia.length,
+            itemCount: Timezones.timezonesAustralia.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesAustralia.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesAustralia.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesAustralia
+                    title: Text(Timezones.timezonesAustralia
                         .elementAt(index)
                         .substring(10)
                         .replaceAll('_', ' ')),
@@ -350,18 +316,18 @@ class _TimezoneCanadaList extends State<TimezoneCanadaList> {
           title: Text('Timezones in the Canada'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesCanada.length,
+            itemCount: Timezones.timezonesCanada.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesCanada.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesCanada.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesCanada
+                    title: Text(Timezones.timezonesCanada
                         .elementAt(index)
                         .substring(7)
                         .replaceAll('_', ' ')),
@@ -386,18 +352,18 @@ class _TimezoneEuropeList extends State<TimezoneEuropeList> {
           title: Text('Timezones in the Europe'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesEurope.length,
+            itemCount: Timezones.timezonesEurope.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesEurope.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesEurope.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesEurope
+                    title: Text(Timezones.timezonesEurope
                         .elementAt(index)
                         .substring(7)
                         .replaceAll('_', ' ')),
@@ -422,18 +388,18 @@ class _TimezoneIndianList extends State<TimezoneIndianList> {
           title: Text('Timezones in the India'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesIndian.length,
+            itemCount: Timezones.timezonesIndian.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesIndian.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesIndian.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesIndian
+                    title: Text(Timezones.timezonesIndian
                         .elementAt(index)
                         .substring(7)
                         .replaceAll('_', ' ')),
@@ -458,18 +424,18 @@ class _TimezonePacificList extends State<TimezonePacificList> {
           title: Text('Timezones in the Pacific'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesPacific.length,
+            itemCount: Timezones.timezonesPacific.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesPacific.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesPacific.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesPacific
+                    title: Text(Timezones.timezonesPacific
                         .elementAt(index)
                         .substring(8)
                         .replaceAll('_', ' ')),
@@ -494,18 +460,18 @@ class _TimezoneUSList extends State<TimezoneUSList> {
           title: Text('Timezones in the US'),
         ),
         body: ListView.builder(
-            itemCount: TimeSources.timezonesUS.length,
+            itemCount: Timezones.timezonesUS.length,
             itemBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
                   ListTile(
                     onTap: () {
-                      TimeSources.currentLocation =
-                          TimeSources.timezonesUS.elementAt(index);
+                      Timezones.currentLocation =
+                          Timezones.timezonesUS.elementAt(index);
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => MainMenu()));
                     },
-                    title: Text(TimeSources.timezonesUS
+                    title: Text(Timezones.timezonesUS
                         .elementAt(index)
                         .substring(3)
                         .replaceAll('_', ' ')),
@@ -516,4 +482,3 @@ class _TimezoneUSList extends State<TimezoneUSList> {
             }));
   }
 }
-

@@ -1,5 +1,7 @@
 import 'dart:async';
-import 'package:clock_checker/models/data_sources.dart';
+import 'package:clock_checker/models/time_sources.dart';
+import 'package:clock_checker/repository/timezones.dart';
+import 'package:clock_checker/views/ntp_server_mainlist.dart';
 import 'package:clock_checker/views/timezone_list.dart';
 import 'package:flutter/material.dart';
 import 'credits.dart';
@@ -18,11 +20,14 @@ class _MainMenu extends State<MainMenu> {
   Timer _timer;
 
   _MainMenu() {
-    Timer.periodic(Duration(milliseconds: 500), (_timer) {
+    Timer.periodic(Duration(milliseconds: 1000), (_timer) {
       setState(() {
         this.systemTime = TimeSources.getSystemTimeToString();
-
-        //TODO: implement getting NTP TimeDate
+        if (!(TimeSources.currentNTPserver == null)) {
+          ntpTime = TimeSources.getNTPTimeToString();
+        } else {
+          ntpTime = '';
+        }
       });
     });
   }
@@ -117,7 +122,7 @@ class _MainMenu extends State<MainMenu> {
                                 Container(
                                   margin: EdgeInsets.all(5),
                                   child: Text(
-                                    'Address: ${TimeSources.currentNTPserver}',
+                                    'Address: ${!(TimeSources.currentNTPserver == null) ? TimeSources.currentNTPserver.getfqdnOrIPaddress() : ''}',
                                   ),
                                 ),
                               ],
@@ -126,8 +131,7 @@ class _MainMenu extends State<MainMenu> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Container(
-                                    child: Text(
-                                        '$ntpTime', //TODO: implement getting time from timeserver
+                                    child: Text('$ntpTime',
                                         style: TextStyle(fontSize: 30)))
                               ],
                             ),
@@ -165,7 +169,7 @@ class _MainMenu extends State<MainMenu> {
                                 Container(
                                     margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                                     child: Text(
-                                        TimeSources.currentLocation
+                                        Timezones.currentLocation
                                             .replaceAll('_', ' '),
                                         style: TextStyle(fontSize: 25)))
                               ],
@@ -193,55 +197,5 @@ class _MainMenu extends State<MainMenu> {
                 ]),
               )),
         ));
-  }
-}
-
-class NTPServerGUIList extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _NTPServerGUIList();
-}
-
-class _NTPServerGUIList extends State<NTPServerGUIList> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('NTP servers'),
-        ),
-        body: ListView.builder(
-            itemCount: TimeSources.ntpServersList.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Column(
-                children: <Widget>[
-                  ListTile(
-                    onLongPress: () {
-                      if (TimeSources.ntpServersList
-                          .elementAt(index)
-                          .isCustomEntry()) {
-                        setState(() {
-                          TimeSources.ntpServersList.removeAt(index);
-                        });
-                      }
-                    },
-                    onTap: () {
-                      TimeSources.currentNTPserver = TimeSources.ntpServersList
-                          .elementAt(index);
-                      Navigator.of(context).pop();
-                    },
-                    title: Text(TimeSources.ntpServersList
-                        .elementAt(index)
-                        .getserverName()),
-                    subtitle: Text(TimeSources.ntpServersList
-                        .elementAt(index)
-                        .getfqdnOrIPaddress()),
-                    leading: CircleAvatar(
-                        backgroundImage: TimeSources.ntpServersList
-                            .elementAt(index)
-                            .getFlag()),
-                  ),
-                  Divider(height: 2.0)
-                ],
-              );
-            }));
   }
 }

@@ -1,123 +1,65 @@
+import 'dart:io';
+
+import 'package:clock_checker/repository/timezones.dart';
+import 'package:clock_checker/models/ntp_server.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
-class NTPServer {
-  AssetImage flag;
-  String fqdnOrIPaddress;
-  String serverName;
-  int port;
-  bool customEntry;
-  NTPServer.custom(String fqdnOrIPaddress, String serverName) {
-    flag = AssetImage('assets/int_flag.png');
-    this.fqdnOrIPaddress = fqdnOrIPaddress;
-    this.serverName = serverName;
-    port = 123;
-    customEntry = true;
-  }
-  NTPServer(AssetImage flag, String fqdnOrIPaddress, String serverName) {
-    this.flag = flag;
-    this.fqdnOrIPaddress = fqdnOrIPaddress;
-    this.serverName = serverName;
-    port = 123;
-    customEntry = false;
-  }
-  AssetImage getFlag() {
-    return this.flag;
-  }
-
-  String getfqdnOrIPaddress() {
-    return this.fqdnOrIPaddress;
-  }
-
-  String getserverName() => this.serverName;
-  bool isCustomEntry() => this.customEntry;
-}
-
 class TimeSources {
-  static tz.TZDateTime currentTime;
-  static Map<String, tz.Location> locations;
-  static List<String> locationsList;
-  static String currentLocation;
-  static List<String> timezonesAfrica = [];
-  static List<String> timezonesAmerica = [];
-  static List<String> timezonesAntarctica = [];
-  static List<String> timezonesAsia = [];
-  static List<String> timezonesAtlantic = [];
-  static List<String> timezonesAustralia = [];
-  static List<String> timezonesCanada = [];
-  static List<String> timezonesEurope = [];
-  static List<String> timezonesIndian = [];
-  static List<String> timezonesPacific = [];
-  static List<String> timezonesUS = [];
-  TimeSources() {
-    tz.initializeTimeZones();
-    locations = tz.timeZoneDatabase.locations;
-    locationsList = locations.keys.toList();
-    currentLocation = 'Europe/Warsaw';
-    currentTime = tz.TZDateTime.now(tz.getLocation(currentLocation));
-    sortLocations();
-  }
-  Map<String, tz.Location> getLocations() {
-    return locations;
+  static tz.TZDateTime currentSystemTime =
+      tz.TZDateTime.now(tz.getLocation(Timezones.currentLocation));
+  static tz.TZDateTime currentNTPTime;
+  static int currentNTPoffset = 0;
+  static NTPServer currentNTPserver;
+  static bool isExceptionCaught = false;
+
+  static void updateNTPTime() {
+    TimeSources.currentSystemTime =
+        tz.TZDateTime.now(tz.getLocation(Timezones.currentLocation));
+    TimeSources.currentNTPTime = TimeSources.currentSystemTime
+        .add(Duration(milliseconds: TimeSources.currentNTPoffset));
   }
 
   static String getSystemTimeToString() => readTimeLikeAHumanTest(
-      tz.TZDateTime.now(tz.getLocation(TimeSources.currentLocation)));
+      tz.TZDateTime.now(tz.getLocation(Timezones.currentLocation)));
 
   static String getNTPTimeToString() {
-    var offset = 0;
-    getNTPOffset(TimeSources.currentTime, currentNTPserver).then(
-      (value) => offset = value);
-    readTimeLikeAHumanTest(tz.TZDateTime.now(tz.getLocation(TimeSources.currentLocation)).add(Duration(milliseconds: offset)));
+    return readTimeLikeAHumanTest(
+        tz.TZDateTime.now(tz.getLocation(Timezones.currentLocation))
+            .add(Duration(milliseconds: TimeSources.currentNTPoffset)));
   }
 
-  List<String> getLocationsList() {
-    return locationsList;
+  static Future<int> getNTPOffset(
+      tz.TZDateTime localTime, NTPServer server) async {
+    try {
+      return await NTP.getNtpOffset(
+          localTime: localTime, lookUpAddress: server.getfqdnOrIPaddress());
+    } on SocketException {
+      TimeSources.currentNTPserver = null;
+      TimeSources.isExceptionCaught = true;
+      print('socket exception called from getntpoffset');
+      return 0;
+    }
   }
 
-  static Future<int> getNTPOffset(tz.TZDateTime localTime, NTPServer server) async {
-    return await NTP.getNtpOffset(
-        localTime: localTime, lookUpAddress: server.fqdnOrIPaddress);
-    //TODO: add try-catch for unreachable IP address/FQDN
+  static Future getNTPOffsetForLocal() async {
+    try {
+      TimeSources.currentNTPoffset = await NTP.getNtpOffset(
+          localTime: TimeSources.currentSystemTime,
+          lookUpAddress: TimeSources.currentNTPserver.fqdnOrIPaddress);
+    } on SocketException {
+      TimeSources.currentNTPoffset = 0;
+      TimeSources.currentNTPserver = null;
+      TimeSources.isExceptionCaught = true;
+    }
   }
 
-  static NTPServer currentNTPserver;
-
-  void sortLocations() => locationsList.forEach((element) {
-        if (element.toString().startsWith('Africa')) {
-          timezonesAfrica.add(element);
-        }
-        if (element.toString().startsWith('America')) {
-          timezonesAmerica.add(element);
-        }
-        if (element.toString().startsWith('Antarctica')) {
-          timezonesAntarctica.add(element);
-        }
-        if (element.toString().startsWith('Atlantic')) {
-          timezonesAtlantic.add(element);
-        }
-        if (element.toString().startsWith('Australia')) {
-          timezonesAustralia.add(element);
-        }
-        if (element.toString().startsWith('Canada')) {
-          timezonesCanada.add(element);
-        }
-        if (element.toString().startsWith('Europe')) {
-          timezonesEurope.add(element);
-        }
-        if (element.toString().startsWith('Indian')) {
-          timezonesIndian.add(element);
-        }
-        if (element.toString().startsWith('Pacific')) {
-          timezonesPacific.add(element);
-        }
-        if (element.toString().startsWith('US')) {
-          timezonesUS.add(element);
-        }
-      });
+  static String readTimeLikeAHumanTest(tz.TZDateTime currentTime) {
+    return DateFormat("E, d MMMM y, HH:mm:ss").format(currentTime);
+  }
 
   static List<NTPServer> ntpServersList = [
     NTPServer(AssetImage('icons/flags/png/us.png', package: 'country_icons'),
@@ -215,8 +157,4 @@ class TimeSources {
     NTPServer(AssetImage('icons/flags/png/gb.png', package: 'country_icons'),
         'uk.pool.ntp.org', 'United Kingdom - pool.ntp.org'),
   ];
-}
-
-String readTimeLikeAHumanTest(tz.TZDateTime currentTime) {
-  return DateFormat("E, d MMMM y, HH:mm:ss").format(currentTime);
 }

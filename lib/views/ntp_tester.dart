@@ -1,6 +1,9 @@
-import 'package:clock_checker/models/data_sources.dart';
+import 'dart:async';
+import 'package:clock_checker/models/ntp_server.dart';
+import 'package:clock_checker/models/time_sources.dart';
+import 'package:clock_checker/views/ntp_add_dialog.dart';
+import 'package:clock_checker/views/ntp_server_mainlist.dart';
 import 'package:flutter/material.dart';
-import '../views/main_menu.dart';
 import 'package:validators/validators.dart';
 
 class NTPTester extends StatefulWidget {
@@ -9,11 +12,29 @@ class NTPTester extends StatefulWidget {
 }
 
 class _NTPTesterState extends State<NTPTester> {
+  String systemTime = TimeSources.getSystemTimeToString();
+  String ntpTime = '';
+  Timer _timer;
   String testServerEntry = '';
 
-  void _testServerSubmission(String e) {
-    print(_testServerController.text);
-    _testServerController.clear();
+  _NTPTesterState() {
+    Timer.periodic(Duration(milliseconds: 1000), (_timer) {
+      setState(() {
+        this.systemTime = TimeSources.getSystemTimeToString();
+        if (!(TimeSources.currentNTPserver == null)) {
+          ntpTime = TimeSources.getNTPTimeToString();
+        } else {
+          ntpTime = '';
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _testServerController.dispose();
+    super.dispose();
   }
 
   final TextEditingController _testServerController =
@@ -45,13 +66,14 @@ class _NTPTesterState extends State<NTPTester> {
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                     child: Text(
                       'NTP server address:',
-                      style: TextStyle(fontSize: 15),
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Container(
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                     child: Text(
-                      'value1',
+                      '${!(TimeSources.currentNTPserver == null) ? TimeSources.currentNTPserver.getfqdnOrIPaddress() : ''}',
                       style: TextStyle(fontSize: 15),
                     ),
                   )
@@ -64,13 +86,14 @@ class _NTPTesterState extends State<NTPTester> {
                     margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: Text(
                       'My time:',
-                      style: TextStyle(fontSize: 15),
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Container(
                     margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: Text(
-                      'value2',
+                      '$systemTime',
                       style: TextStyle(fontSize: 15),
                     ),
                   )
@@ -83,13 +106,14 @@ class _NTPTesterState extends State<NTPTester> {
                     margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: Text(
                       'NTP time:',
-                      style: TextStyle(fontSize: 15),
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Container(
                     margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: Text(
-                      'value3',
+                      '$ntpTime',
                       style: TextStyle(fontSize: 15),
                     ),
                   )
@@ -102,13 +126,14 @@ class _NTPTesterState extends State<NTPTester> {
                     margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
                     child: Text(
                       'Difference with system time:',
-                      style: TextStyle(fontSize: 15),
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Container(
                     margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
                     child: Text(
-                      'value4',
+                      '${TimeSources.currentNTPoffset} ms',
                       style: TextStyle(fontSize: 15),
                     ),
                   )
@@ -118,7 +143,6 @@ class _NTPTesterState extends State<NTPTester> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   SizedBox(
-                      //padding: EdgeInsets.symmetric(horizontal: 80.0),
                       width: 250,
                       child: TextField(
                         enabled: true,
@@ -128,26 +152,41 @@ class _NTPTesterState extends State<NTPTester> {
                         obscureText: false,
                         onChanged: (String e) =>
                             setState(() => testServerEntry = e),
-                        onSubmitted: _testServerSubmission,
                       )),
                   GestureDetector(
                     onTap: () {
+                      print('Entry: $testServerEntry');
                       if (isFQDN(testServerEntry) || isIP(testServerEntry)) {
-                        _testServerSubmission(testServerEntry);
-                        setState(() => testServerEntry = '');
-                        //TODO: execute NTP server test
+                        TimeSources.currentNTPserver =
+                            NTPServer.custom(testServerEntry, 'custom entry');
+                        TimeSources.getNTPOffsetForLocal().then((value) {
+                          if (TimeSources.isExceptionCaught) {
+                            SnackBar snack = SnackBar(
+                              content: Text('Error: unreachable NTP server.'),
+                              action: SnackBarAction(
+                                label: 'OK',
+                                onPressed: () {
+                                },
+                              ),
+                            );
+                            Scaffold.of(context).showSnackBar(snack);
+                            TimeSources.isExceptionCaught = false;
+                          }
+                        });
+
+                        TimeSources.updateNTPTime();
+                        setState(() {});
                       } else {
-                        SnackBar(
-                          //TODO: make this snackbar work
+                        SnackBar snack = SnackBar(
                           content: Text(
                               'Invalid data, enter FQDN or an IP address.'),
                           action: SnackBarAction(
                             label: 'OK',
                             onPressed: () {
-                              // Some code to undo the change.
                             },
                           ),
                         );
+                        Scaffold.of(context).showSnackBar(snack);
                       }
                     },
                     child: Container(
@@ -166,8 +205,7 @@ class _NTPTesterState extends State<NTPTester> {
               GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          NTPServerGUIList()));
+                      builder: (context) => NTPServerGUIList()));
                 },
                 child: Container(
                   height: 40,
@@ -211,75 +249,5 @@ class _NTPTesterState extends State<NTPTester> {
         ),
       ),
     );
-  }
-}
-
-class NTPAddDialog extends StatefulWidget {
-  @override
-  NTPAddDialog({Key key, this.title}) : super(key: key);
-  final String title;
-  State<StatefulWidget> createState() => _NTPAddDialog();
-}
-
-class _NTPAddDialog extends State<NTPAddDialog> {
-  final formKey = GlobalKey<FormState>();
-  String _addServerEntry = '';
-  String _addFQDNEntry = '';
-
-  void _submit() {
-    if (formKey.currentState.validate()) {
-      formKey.currentState.save();
-      TimeSources.ntpServersList
-          .add(NTPServer.custom(_addFQDNEntry, _addServerEntry));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Add new NTP server'),
-        ),
-        body: Card(
-            child: Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Form(
-            key: formKey,
-            child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-              TextFormField(
-                decoration: InputDecoration(
-                  hintText: 'Enter your server name here',
-                  labelText: 'Server name',
-                ),
-                validator: (input) =>
-                    (input.isEmpty) ? 'Empty server name' : null,
-                onSaved: (input) => _addServerEntry = input,
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  hintText: 'Enter server IP or FQDN address here',
-                  labelText: 'Server address (IP or FQDN)',
-                ),
-                validator: (input) => !(isIP(input) || isFQDN(input))
-                    ? 'Invalid IP/FQDN address'
-                    : null,
-                onSaved: (input) => _addFQDNEntry = input,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: RaisedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            _submit();
-                          } ,
-                          child: Text('Add NTP server'))),
-                ],
-              ),
-            ]),
-          ),
-        )));
   }
 }
