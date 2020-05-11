@@ -102,7 +102,7 @@ class _MainMenu extends State<MainMenu> {
                                 Container(
                                     margin: EdgeInsets.fromLTRB(10, 0, 10, 40),
                                     child: Text('$systemTime',
-                                        style: TextStyle(fontSize: 30)))
+                                        style: TextStyle(fontSize: 27)))
                               ],
                             ),
                             Row(
@@ -132,7 +132,7 @@ class _MainMenu extends State<MainMenu> {
                               children: [
                                 Container(
                                     child: Text('$ntpTime',
-                                        style: TextStyle(fontSize: 30)))
+                                        style: TextStyle(fontSize: 27)))
                               ],
                             ),
                             InkWell(
